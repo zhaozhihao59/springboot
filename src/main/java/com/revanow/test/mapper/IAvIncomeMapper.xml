@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.revanow.test.dao.IAvIncomeDao">
+	<resultMap type="com.revanow.test.entity.AvIncome" id="avIncomeResultMap" >
+		<!-- 自增ID -->
+		<result property="id" column="id" />
+		<!-- 视频ID -->
+		<result property="avId" column="av_id" />
+		<!-- 用户MID -->
+		<result property="mid" column="mid" />
+		<!-- 分区ID -->
+		<result property="tagId" column="tag_id" />
+		<!-- 是否原创0-非原创1-原创 -->
+		<result property="isOriginal" column="is_original" />
+		<!-- 投稿时间 -->
+		<result property="uploadTime" column="upload_time" />
+		<!-- 播放量 -->
+		<result property="playCount" column="play_count" />
+		<!--  -->
+		<result property="totalIncome" column="total_income" />
+		<!-- 新增的收入 -->
+		<result property="income" column="income" />
+		<!-- 日期 -->
+		<result property="date" column="date" />
+		<!-- 是否删除 -->
+		<result property="isDeleted" column="is_deleted" />
+		<!-- 添加时间 -->
+		<result property="ctime" column="ctime" />
+		<!-- 修改时间 -->
+		<result property="mtime" column="mtime" />
+	</resultMap>
+
+
+	<sql id="allColumnSql">
+		o.id,
+		o.av_id,
+		o.mid,
+		o.tag_id,
+		o.is_original,
+		o.upload_time,
+		o.play_count,
+		o.total_income,
+		o.income,
+		o.date,
+		o.is_deleted,
+		o.ctime,
+		o.mtime
+	</sql>
+
+
+	<sql id="searchConditionSql">
+	</sql>
+
+	<select id="listAvIncomeAll" resultMap="avIncomeResultMap">
+		SELECT <include refid="allColumnSql"/>
+		FROM av_income o limit 50000
+	</select>
+
+	<select id="getAvIncomeByPageCount" resultType="int">
+		SELECT count(1)
+		FROM av_income o
+		WHERE 1=1 <include refid="searchConditionSql"/>
+	</select>
+
+	<select id="listAvIncomeByPage" resultMap="avIncomeResultMap">
+		SELECT <include refid="allColumnSql"/>
+		FROM av_income o
+		WHERE 1=1 <include refid="searchConditionSql"/>
+	</select>
+
+	<select id="getAvIncomeById" resultMap="avIncomeResultMap">
+		SELECT <include refid="allColumnSql"/>
+		FROM av_income o
+		WHERE o.ID = #{id}
+	</select>
+
+	<insert id="add" parameterType="avIncome" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO av_income
+		(
+		<trim suffixOverrides=",">
+		<if test="avId != null ">
+		av_id,
+		</if>
+		<if test="mid != null ">
+		mid,
+		</if>
+		<if test="tagId != null ">
+		tag_id,
+		</if>
+		<if test="isOriginal != null ">
+		is_original,
+		</if>
+		<if test="uploadTime != null ">
+		upload_time,
+		</if>
+		<if test="playCount != null ">
+		play_count,
+		</if>
+		<if test="totalIncome != null ">
+		total_income,
+		</if>
+		<if test="income != null ">
+		income,
+		</if>
+		<if test="date != null ">
+		date,
+		</if>
+		<if test="isDeleted != null ">
+		is_deleted,
+		</if>
+		<if test="ctime != null ">
+		ctime,
+		</if>
+		<if test="mtime != null ">
+		mtime,
+		</if>
+		</trim>
+		)
+		VALUES
+		(
+		<trim suffixOverrides=",">
+		<if test="avId != null ">
+		#{avId},
+		</if>
+		<if test="mid != null ">
+		#{mid},
+		</if>
+		<if test="tagId != null ">
+		#{tagId},
+		</if>
+		<if test="isOriginal != null ">
+		#{isOriginal},
+		</if>
+		<if test="uploadTime != null ">
+		#{uploadTime},
+		</if>
+		<if test="playCount != null ">
+		#{playCount},
+		</if>
+		<if test="totalIncome != null ">
+		#{totalIncome},
+		</if>
+		<if test="income != null ">
+		#{income},
+		</if>
+		<if test="date != null ">
+		#{date},
+		</if>
+		<if test="isDeleted != null ">
+		#{isDeleted},
+		</if>
+		<if test="ctime != null ">
+		#{ctime},
+		</if>
+		<if test="mtime != null ">
+		#{mtime},
+		</if>
+		</trim>
+		)
+		</insert>
+
+	<insert id="batchInsert" >
+		INSERT INTO av_income
+		(
+		av_id,
+		mid,
+		tag_id,
+		is_original,
+		upload_time,
+		play_count,
+		total_income,
+		income,
+		date,
+		is_deleted,
+		ctime,
+		mtime
+		)
+		VALUES
+		<foreach collection="list" index="index" item="item" separator=",">
+		(
+		#{item.avId},
+		#{item.mid},
+		#{item.tagId},
+		#{item.isOriginal},
+		#{item.uploadTime},
+		#{item.playCount},
+		#{item.totalIncome},
+		#{item.income},
+		#{item.date},
+		#{item.isDeleted},
+		#{item.ctime},
+		#{item.mtime}
+		)
+		</foreach>
+		</insert>
+
+	<update id="update" parameterType="avIncome">
+		UPDATE av_income
+		<trim prefix="set" suffixOverrides=",">
+		<if test="avId != null ">
+		av_id = #{avId},
+		</if>
+		<if test="mid != null ">
+		mid = #{mid},
+		</if>
+		<if test="tagId != null ">
+		tag_id = #{tagId},
+		</if>
+		<if test="isOriginal != null ">
+		is_original = #{isOriginal},
+		</if>
+		<if test="uploadTime != null ">
+		upload_time = #{uploadTime},
+		</if>
+		<if test="playCount != null ">
+		play_count = #{playCount},
+		</if>
+		<if test="totalIncome != null ">
+		total_income = #{totalIncome},
+		</if>
+		<if test="income != null ">
+		income = #{income},
+		</if>
+		<if test="date != null ">
+		date = #{date},
+		</if>
+		<if test="isDeleted != null ">
+		is_deleted = #{isDeleted},
+		</if>
+		<if test="ctime != null ">
+		ctime = #{ctime},
+		</if>
+		<if test="mtime != null ">
+		mtime = #{mtime},
+		</if>
+		</trim>
+		WHERE ID = #{id}
+	</update>
+
+	<delete id="delByIds">
+		DELETE FROM av_income
+		WHERE ID IN
+		<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+</mapper>

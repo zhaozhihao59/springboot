@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.revanow.test.dao.IUpIncomeDao">
+	<resultMap type="com.revanow.test.entity.UpIncome" id="upIncomeResultMap" >
+		<!-- 自增ID -->
+		<result property="id" column="id" />
+		<!-- 用户MID -->
+		<result property="mid" column="mid" />
+		<!-- 补贴视频数 -->
+		<result property="avCount" column="av_count" />
+		<!-- 播放量 -->
+		<result property="playCount" column="play_count" />
+		<!-- 新增的收入 -->
+		<result property="income" column="income" />
+		<!--  -->
+		<result property="totalIncome" column="total_income" />
+		<!-- 日期 -->
+		<result property="date" column="date" />
+		<!-- 是否删除 -->
+		<result property="isDeleted" column="is_deleted" />
+		<!-- 添加时间 -->
+		<result property="ctime" column="ctime" />
+		<!-- 修改时间 -->
+		<result property="mtime" column="mtime" />
+	</resultMap>
+
+
+	<sql id="allColumnSql">
+		o.id,
+		o.mid
+		<!-- o.av_count,
+		o.play_count,
+		o.income,
+		o.total_income,
+		o.date,
+		o.is_deleted,
+		o.ctime,
+		o.mtime -->
+	</sql>
+
+
+	<sql id="searchConditionSql">
+	</sql>
+
+	<select id="listUpIncomeAll" resultMap="upIncomeResultMap">
+		SELECT <include refid="allColumnSql"/>
+		FROM up_income o limit 50000
+	</select>
+
+	<select id="getUpIncomeByPageCount" resultType="int">
+		SELECT count(1)
+		FROM up_income o
+		WHERE 1=1 <include refid="searchConditionSql"/>
+	</select>
+
+	<select id="listUpIncomeByPage" resultMap="upIncomeResultMap">
+		SELECT <include refid="allColumnSql"/>
+		FROM up_income o
+		WHERE 1=1 <include refid="searchConditionSql"/>
+	</select>
+
+	<select id="getUpIncomeById" resultMap="upIncomeResultMap">
+		SELECT <include refid="allColumnSql"/>
+		FROM up_income o
+		WHERE o.ID = #{id}
+	</select>
+
+	<insert id="add" parameterType="upIncome" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO up_income
+		(
+		<trim suffixOverrides=",">
+		<if test="mid != null ">
+		mid,
+		</if>
+		<if test="avCount != null ">
+		av_count,
+		</if>
+		<if test="playCount != null ">
+		play_count,
+		</if>
+		<if test="income != null ">
+		income,
+		</if>
+		<if test="totalIncome != null ">
+		total_income,
+		</if>
+		<if test="date != null ">
+		date,
+		</if>
+		<if test="isDeleted != null ">
+		is_deleted,
+		</if>
+		<if test="ctime != null ">
+		ctime,
+		</if>
+		<if test="mtime != null ">
+		mtime,
+		</if>
+		</trim>
+		)
+		VALUES
+		(
+		<trim suffixOverrides=",">
+		<if test="mid != null ">
+		#{mid},
+		</if>
+		<if test="avCount != null ">
+		#{avCount},
+		</if>
+		<if test="playCount != null ">
+		#{playCount},
+		</if>
+		<if test="income != null ">
+		#{income},
+		</if>
+		<if test="totalIncome != null ">
+		#{totalIncome},
+		</if>
+		<if test="date != null ">
+		#{date},
+		</if>
+		<if test="isDeleted != null ">
+		#{isDeleted},
+		</if>
+		<if test="ctime != null ">
+		#{ctime},
+		</if>
+		<if test="mtime != null ">
+		#{mtime},
+		</if>
+		</trim>
+		)
+		</insert>
+
+	<insert id="batchInsert" >
+		INSERT INTO up_income
+		(
+		mid,
+		av_count,
+		play_count,
+		income,
+		total_income,
+		date,
+		is_deleted,
+		ctime,
+		mtime
+		)
+		VALUES
+		<foreach collection="list" index="index" item="item" separator=",">
+		(
+		#{item.mid},
+		#{item.avCount},
+		#{item.playCount},
+		#{item.income},
+		#{item.totalIncome},
+		#{item.date},
+		#{item.isDeleted},
+		#{item.ctime},
+		#{item.mtime}
+		)
+		</foreach>
+		</insert>
+
+	<update id="update" parameterType="upIncome">
+		UPDATE up_income
+		<trim prefix="set" suffixOverrides=",">
+		<if test="mid != null ">
+		mid = #{mid},
+		</if>
+		<if test="avCount != null ">
+		av_count = #{avCount},
+		</if>
+		<if test="playCount != null ">
+		play_count = #{playCount},
+		</if>
+		<if test="income != null ">
+		income = #{income},
+		</if>
+		<if test="totalIncome != null ">
+		total_income = #{totalIncome},
+		</if>
+		<if test="date != null ">
+		date = #{date},
+		</if>
+		<if test="isDeleted != null ">
+		is_deleted = #{isDeleted},
+		</if>
+		<if test="ctime != null ">
+		ctime = #{ctime},
+		</if>
+		<if test="mtime != null ">
+		mtime = #{mtime},
+		</if>
+		</trim>
+		WHERE ID = #{id}
+	</update>
+
+	<delete id="delByIds">
+		DELETE FROM up_income
+		WHERE ID IN
+		<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+</mapper>

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.revanow.auth.dao.IDepartDao">
+	<resultMap type="depart" id="departResultMap" >
+	    <!--  -->
+		<result property="id" column="ID" />
+		<!--  -->
+		<result property="createBy" column="P_CREATE_BY" />
+		<!--  -->
+		<result property="createDate" column="P_CREATE_DATE" />
+		<!--  -->
+		<result property="updateBy" column="P_UPDATE_BY" />
+		<!--  -->
+		<result property="updateDate" column="P_UPDATE_DATE" />
+		<!--  -->
+		<result property="deleteFlag" column="P_DELETE_FLAG" />
+		<!-- 部门名称 -->
+		<result property="name" column="P_NAME" />
+		<!-- 父级部门ID -->
+		<result property="parentId" column="P_PARENT_ID" />
+		<!-- 节点级别：1-一级节点，2-二级节点，3-三级节点 -->
+		<result property="level" column="P_LEVEL" />
+		<!-- 部门备注 -->
+		<result property="note" column="P_NOTE" />
+		<!-- 排序参数：数字越小越靠前 -->
+		<result property="sort" column="P_SORT" />
+	</resultMap>
+
+	<sql id="allColumnSql">
+		o.ID,
+		o.P_CREATE_BY,
+		o.P_CREATE_DATE,
+		o.P_UPDATE_BY,
+		o.P_UPDATE_DATE,
+		o.P_DELETE_FLAG,
+		o.P_NAME,
+		o.P_PARENT_ID,
+		o.P_LEVEL,
+		o.P_NOTE,
+		o.P_SORT
+	</sql>
+
+	<sql id="searchConditionSql">
+		<if test="condition.name != null and condition.name != ''">
+			AND o.P_NAME like concat('%',#{condition.name},'%') 
+		</if>
+		<if test="condition.parentId != null and condition.parentId != ''">
+			AND o.P_PARENT_ID like concat('%',#{condition.parentId},'%') 
+		</if>
+		<if test="condition.note != null and condition.note != ''">
+			AND o.P_NOTE like concat('%',#{condition.note},'%') 
+		</if>
+		<if test="condition.manageId != null and condition.manageId != ''">
+			AND o.P_MANAGE_ID like concat('%',#{condition.manageId},'%') 
+		</if>
+	</sql>
+	
+	<select id="listDepartAll" resultMap="departResultMap">
+		SELECT <include refid="allColumnSql"/>
+		FROM auth_depart o
+		WHERE 1=1
+	</select>
+
+	<select id="listDepartByPage" resultMap="departResultMap">
+		SELECT <include refid="allColumnSql"/>
+		FROM auth_depart o
+		WHERE 1=1 <include refid="searchConditionSql"/> 
+	</select>
+	
+	<select id="listDepartByPageCount" resultType="int">
+		SELECT count(1) FROM auth_depart o
+		WHERE 1=1 <include refid="searchConditionSql"/> 
+	</select>
+	
+	<!-- 根据上级ID查询部门列表 -->
+	<select id="listDepartByPid" resultMap="departResultMap">
+		SELECT 
+		<include refid="allColumnSql"/> 
+		from auth_depart o
+		WHERE o.P_DELETE_FLAG = 0 
+		AND o.P_PARENT_ID = #{parentId}
+		ORDER BY o.P_SORT ASC 
+	</select>
+
+	<!--根据部门ID 查找部门 -->
+	<select id="getDepartById" resultMap="departResultMap">
+		SELECT <include refid="allColumnSql"/>
+		FROM auth_depart o
+		WHERE o.ID = #{id}
+	</select>
+	
+	<select id="getCountByParentId" resultType="int">
+		SELECT COUNT(1) 
+		FROM auth_depart o 
+		WHERE o.P_PARENT_ID = #{parentId}
+	</select>
+	
+	<select id="getMaxSort" resultType="java.lang.Integer">
+		SELECT MAX(P_SORT)
+		FROM auth_depart o
+		WHERE o.P_PARENT_ID = #{parentId}
+	</select>
+
+	<insert id="add" parameterType="depart" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO auth_depart(
+		P_CREATE_BY,
+		P_CREATE_DATE,
+		P_UPDATE_BY,
+		P_UPDATE_DATE,
+		P_DELETE_FLAG,
+		P_NAME,
+		P_PARENT_ID,
+		P_LEVEL,
+		P_NOTE,
+		P_SORT
+		)
+		VALUES
+		(
+		#{createBy},
+		SYSDATE(),
+		#{updateBy},
+		SYSDATE(),
+		0,
+		#{name},
+		#{parentId},
+		#{level},
+		#{note},
+		#{sort}
+		)
+	</insert>
+
+	<update id="update" parameterType="depart" >
+		UPDATE auth_depart SET
+		P_UPDATE_BY = #{updateBy},
+		P_UPDATE_DATE = #{updateDate},
+		P_NAME = #{name},
+		P_NOTE = #{note},
+		P_PARENT_ID = #{parentId},
+		P_LEVEL = #{level}
+		WHERE ID = #{id}
+	</update>
+
+	<delete id="delByIds">
+		DELETE FROM auth_depart 
+		WHERE ID IN 
+		<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<!--根据部门Name 查找部门 -->
+	<select id="getDepartByName" resultMap="departResultMap">
+		SELECT <include refid="allColumnSql"/>
+		FROM auth_depart o
+		WHERE o.P_NAME = #{name} limit 0,1
+	</select>
+	
+	
+</mapper>

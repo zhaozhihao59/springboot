@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.revanow.auth.dao.IRightDao">
+	<resultMap type="right" id="rightResultMap" >
+		<!--  -->
+		<result property="id" column="ID" />
+		<!--  -->
+		<result property="createBy" column="P_CREATE_BY" />
+		<!--  -->
+		<result property="createDate" column="P_CREATE_DATE" />
+		<!--  -->
+		<result property="updateBy" column="P_UPDATE_BY" />
+		<!--  -->
+		<result property="updateDate" column="P_UPDATE_DATE" />
+		<!--  -->
+		<result property="deleteFlag" column="P_DELETE_FLAG" />
+		<!--  -->
+		<result property="name" column="P_NAME" />
+		<!--  -->
+		<result property="parentId" column="P_PARENT_ID" />
+		<!--  -->
+		<result property="location" column="P_LOCATION" />
+		<!--  -->
+		<result property="tip" column="P_TIP" />
+		<!--  -->
+		<result property="url" column="P_URL" />
+		<!--  -->
+		<result property="state" column="P_STATE" />
+		<!--  -->
+		<result property="pcode" column="P_PCODE" />
+		<!--  -->
+		<result property="sort" column="P_SORT" />
+		<!-- 图标名 -->
+		<result property="iconPath" column="P_ICON_PATH" />
+		<!-- 是否维护 -->
+		<result property="service" column="P_SERVICE" />
+		<!-- 是否维护 -->
+		<result property="hidden" column="P_HIDDEN" />
+	</resultMap>
+
+
+	<sql id="allColumnSql">
+		o.ID,
+		o.P_CREATE_BY,
+		o.P_CREATE_DATE,
+		o.P_UPDATE_BY,
+		o.P_UPDATE_DATE,
+		o.P_DELETE_FLAG,
+		o.P_NAME,
+		o.P_PARENT_ID,
+		o.P_LOCATION,
+		o.P_TIP,
+		o.P_URL,
+		o.P_STATE,
+		o.P_PCODE,
+		o.P_SORT,
+		o.P_ICON_PATH,
+		o.P_SERVICE,
+		o.P_HIDDEN
+	</sql>
+	
+	<sql id="searchConditionSql">
+		<if test="condition.name != null and condition.name != ''">
+			AND o.P_NAME like '%${condition.name}%' 
+		</if>
+		<if test="condition.parentId != null and condition.parentId != ''">
+			AND o.P_PARENT_ID like '%${condition.parentId}%' 
+		</if>
+		<if test="condition.tip != null and condition.tip != ''">
+			AND o.P_TIP like '%${condition.tip}%' 
+		</if>
+		<if test="condition.url != null and condition.url != ''">
+			AND o.P_URL like '%${condition.url}%' 
+		</if>
+		<if test="condition.pcode != null and condition.pcode != ''">
+			AND o.P_PCODE like '%${condition.pcode}%' 
+		</if>
+		<if test="condition.iconPath != null and condition.iconPath != ''">
+			AND o.P_ICON_PATH like '%${condition.iconPath}%' 
+		</if>
+
+	</sql>
+	
+	<!-- 查询所有权限 -->
+	<select id="listRightAll" resultMap="rightResultMap">
+		SELECT 
+		<include refid="allColumnSql"/>
+		FROM auth_right o 
+		WHERE o.P_STATE = 1 
+		AND o.P_DELETE_FLAG !=1  
+		ORDER BY o.P_SORT
+	</select>
+ 	<select id="listRightByDepartId" resultMap="rightResultMap">
+ 	    SELECT DISTINCT
+		<include refid="allColumnSql"/>
+		FROM auth_right o 
+		INNER JOIN auth_role_right o1 ON o.id = o1.P_right_id 
+		INNER JOIN auth_role_depart o2 ON o1.P_ROLE_ID = o2.P_ROLE_ID
+		WHERE o.P_STATE = 1 AND o2.P_DEPART_ID = #{departId}
+		AND o.P_DELETE_FLAG !=1  
+		ORDER BY o.P_SORT
+ 	</select>
+	<select id="listRightByParentId" resultMap="rightResultMap">
+		SELECT DISTINCT 
+		<include refid="allColumnSql"/> 
+		FROM auth_right o 
+		INNER JOIN auth_role_right o1 ON o.id = o1.P_right_id 
+		INNER JOIN auth_role_depart o2 ON o1.P_ROLE_ID = o2.P_ROLE_ID
+		WHERE o.P_PARENT_ID = #{pid} AND o2.P_DEPART_ID = #{departId}
+		AND o.P_DELETE_FLAG !=1  
+		ORDER BY o.P_SORT 
+	</select>
+	
+	<select id="listRightByRoleId" resultMap="rightResultMap">
+		SELECT DISTINCT 
+		<include refid="allColumnSql"/> 
+		FROM auth_right o 
+		INNER JOIN auth_role_right o1 ON o.id = o1.P_right_id
+		WHERE o1.P_role_id = #{roleId}
+	</select>
+	
+	<select id="listRightByUserId" resultMap="rightResultMap" >
+		SELECT DISTINCT 
+		<include refid="allColumnSql"/>
+		FROM auth_right o
+		INNER JOIN auth_role_right o1 on o.ID = o1.P_RIGHT_ID 
+		INNER JOIN auth_user_role o2 on o2.P_ROLE_ID = o1.P_ROLE_ID
+		WHERE o2.P_USER_ID = #{userId} 
+		AND o.P_DELETE_FLAG !=1 
+		ORDER BY o.P_SORT
+	</select>
+	
+	<select id="getRightById" resultMap="rightResultMap">
+		SELECT <include refid="allColumnSql"/>
+		FROM auth_right o
+		WHERE o.ID = #{id}
+	</select>
+	
+	<insert id="add" parameterType="right" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO auth_right
+		(
+		P_CREATE_BY,
+		P_CREATE_DATE,
+		P_UPDATE_BY,
+		P_UPDATE_DATE,
+		P_DELETE_FLAG,
+		P_NAME,
+		P_PARENT_ID,
+		P_LOCATION,
+		P_TIP,
+		P_URL,
+		P_STATE,
+		P_PCODE,
+		P_SORT,
+		P_ICON_PATH,
+		P_SERVICE,
+		P_HIDDEN
+		)
+		VALUES
+		(
+		#{createBy},
+		SYSDATE(),
+		#{updateBy},
+		SYSDATE(),
+		0,
+		#{name},
+		#{parentId},
+		#{location},
+		#{tip},
+		#{url},
+		1,
+		#{pcode},
+		#{sort},
+		#{iconPath},
+		#{service},
+		#{hidden}
+		)
+	</insert>
+	
+		<!-- 修改 -->
+	<update id="update" parameterType="right">
+		UPDATE auth_right SET
+		P_UPDATE_DATE=#{updateDate},
+		P_UPDATE_BY=#{updateBy}, 
+		P_NAME = #{name}, 
+		P_SORT = #{sort}, 
+		P_TIP = #{tip},
+		P_URL = #{url},
+		P_PCODE = #{pcode},
+		P_ICON_PATH = #{iconPath},
+		P_SERVICE = #{service},
+		P_HIDDEN = #{hidden}
+		WHERE id = #{id}
+	</update>
+	
+	<delete id="delByIds">
+		DELETE FROM auth_right 
+		WHERE ID IN 
+		<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+</mapper>

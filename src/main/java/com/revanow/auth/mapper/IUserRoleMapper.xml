@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.revanow.auth.dao.IUserRoleDao">
+
+  <select id="listRoleByUserId" resultMap="com.revanow.auth.dao.IRoleDao.roleResultMap">
+    SELECT DISTINCT <include refid="com.revanow.auth.dao.IRoleDao.allColumnSql"/>
+    FROM auth_user_role o0
+    INNER JOIN auth_role o ON o0.P_ROLE_ID = o.ID
+    WHERE o0.P_USER_ID = #{userId}
+  </select>
+  
+  <select id="listUserByRoleId" resultMap="com.revanow.auth.dao.IUserDao.userResultMap">
+  	SELECT DISTINCT <include refid="com.revanow.auth.dao.IUserDao.allColumnSql"/>
+    FROM auth_user_role o0
+    INNER JOIN auth_user o ON o0.P_USER_ID = o.ID
+    WHERE o0.P_ROLE_ID = #{roleId}
+  </select>
+
+  <insert id="add" parameterType="userRole">
+    
+    INSERT INTO auth_user_role
+    (
+    P_USER_ID,
+    P_ROLE_ID
+    )
+    VALUES
+    (
+	#{userId},
+	#{roleId}
+    )
+  </insert>
+
+  <delete id="delByUserId">
+    DELETE FROM auth_user_role
+    WHERE P_USER_ID = #{userId}
+  </delete>
+  <delete id="delByUserIdAndRoleId"> 
+ 	DELETE FROM auth_user_role
+    WHERE P_USER_ID = #{userId} and P_ROLE_ID = #{roleId}
+  </delete>
+</mapper>

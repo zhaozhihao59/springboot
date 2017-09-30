@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.revanow.auth.dao.IUserDao">
+	<resultMap type="user" id="userResultMap" >
+		<!--  -->
+		<result property="id" column="ID" />
+		<!--  -->
+		<result property="createBy" column="P_CREATE_BY" />
+		<!--  -->
+		<result property="createDate" column="P_CREATE_DATE" />
+		<!--  -->
+		<result property="updateBy" column="P_UPDATE_BY" />
+		<!--  -->
+		<result property="updateDate" column="P_UPDATE_DATE" />
+		<!--  -->
+		<result property="deleteFlag" column="P_DELETE_FLAG" />
+		<!--  -->
+		<result property="staffId" column="P_STAFF_ID" />
+		<!--  -->
+		<result property="departId" column="P_DEPART_ID" />
+		<!-- 姓名 -->
+		<result property="name" column="P_NAME" />
+		<!--  -->
+		<result property="sex" column="P_SEX" />
+		<!--  -->
+		<result property="birthday" column="P_BIRTHDAY" />
+		<!-- 手机号码 -->
+		<result property="mobile" column="P_MOBILE" />
+		<!--  -->
+		<result property="tel" column="P_TEL" />
+		<!--  -->
+		<result property="isManager" column="P_IS_MANAGE" />
+		<!-- 电子邮箱 -->
+		<result property="email" column="P_EMAIL" />
+		<!--  -->
+		<result property="contact" column="P_CONTACT" />
+		<!-- 会员帐号 -->
+		<result property="account" column="P_ACCOUNT" />
+		<!-- 登录密码 -->
+		<result property="password" column="P_PASSWORD" />
+		<!--  -->
+		<result property="state" column="P_STATE" />
+		<!-- 部门ID -->
+		<result property="departId" column="P_DEPART_ID" />
+		<!--  -->
+		<result property="onlineState" column="P_ONLINE_STATE" />
+		<!-- 是否修改了密码 -->
+		<result property="isChangePwd" column="P_IS_CHANGE_PWD" />
+	</resultMap>
+
+
+	<sql id="allColumnSql">
+    o.ID,
+    o.P_CREATE_BY,
+    o.P_CREATE_DATE,
+    o.P_UPDATE_BY,
+    o.P_UPDATE_DATE,
+    o.P_DELETE_FLAG,
+    o.P_STAFF_ID,
+    o.P_NAME,
+    o.P_SEX,
+    o.P_BIRTHDAY,
+    o.P_MOBILE,
+    o.P_TEL,
+    o.P_EMAIL,
+    o.P_DEPART_ID,
+    o.P_CONTACT,
+    o.P_ACCOUNT,
+    o.P_PASSWORD,
+    o.P_STATE,
+    o.P_ONLINE_STATE,
+    o.P_IS_CHANGE_PWD,
+    o.P_IS_MANAGE
+  </sql>
+
+  <sql id="searchConditionSql">
+  	  <if test="condition.searchKey != null and condition.searchKey != ''">
+      	AND (o.P_ACCOUNT like '%${condition.searchKey}%' OR o.P_NAME like '%${condition.searchKey}%')
+	  </if>
+	  <if test="condition.staffId != null and condition.staffId != ''">
+      	AND o.P_STAFF_ID like '%${condition.staffId}%'
+	  </if>
+	  <if test="condition.name != null and condition.name != ''">
+      	AND o.P_NAME like '%${condition.name}%'
+	  </if>
+	  <if test="condition.mobile != null and condition.mobile != ''">
+      	AND o.P_MOBILE like '%${condition.mobile}%'
+	  </if>
+	  <if test="condition.tel != null and condition.tel != ''">
+      	AND o.P_TEL like '%${condition.tel}%'
+	  </if>
+	  <if test="condition.email != null and condition.email != ''">
+      	AND o.P_EMAIL like '%${condition.email}%'
+	  </if>
+	  <if test="condition.contact != null and condition.contact != ''">
+      	AND o.P_CONTACT like '%${condition.contact}%'
+	  </if>
+	  <if test="condition.account != null and condition.account != ''">
+      	AND o.P_ACCOUNT like '%${condition.account}%'
+	  </if>
+	  <if test="condition.password != null and condition.password != ''">
+      	AND o.P_PASSWORD like '%${condition.password}%'
+	  </if>
+	  <if test="condition.departId != null and condition.departId != ''">
+	  	AND o.P_DEPART_ID in (select id from auth_depart where FIND_IN_SET(id, getDepartListByPid('${condition.departId}')))
+	  </if>
+  </sql>
+	<select id="getUserCountByDepartId" resultType="int">
+	    select count(*) from auth_user o where o.P_DEPART_ID = #{id}
+	</select>
+  <select id="listUserAll" resultMap="userResultMap">
+    SELECT <include refid="allColumnSql"/>
+    FROM auth_user o
+  </select>
+  <update id="updatePassword" parameterType="user" >
+      UPDATE auth_user SET
+      P_IS_CHANGE_PWD = #{isChangePwd},
+      P_PASSWORD = #{password}
+      WHERE ID = #{id}
+  </update>
+  <select id="listUserByPage" resultMap="userResultMap">
+    SELECT DISTINCT <include refid="allColumnSql"/>
+    FROM auth_user o 
+    WHERE o.P_DELETE_FLAG = 0 AND o.P_ACCOUNT != 'admin' <include refid="searchConditionSql"/>
+  </select>
+  <select id="listUserByPageCount" resultType="int">
+    SELECT count(DISTINCT o.ID) FROM auth_user o  
+    WHERE o.P_DELETE_FLAG = 0 AND o.P_ACCOUNT != 'admin' <include refid="searchConditionSql"/>
+  </select>
+  <update id="updateDepartByItem"  parameterType="user">
+       UPDATE auth_user SET
+       P_DEPART_ID = #{departId}
+       WHERE ID IN 
+       <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+           #{item}
+       </foreach>
+  </update>
+  <select id="getUserById" resultMap="userResultMap">
+    SELECT <include refid="allColumnSql"/>
+    FROM auth_user o
+    WHERE o.ID = #{id}
+  </select>
+  
+  <select id="getUserByAccount" resultMap="userResultMap">
+  	SELECT <include refid="allColumnSql"/>
+    FROM auth_user o
+    WHERE o.P_ACCOUNT = #{account}
+  </select>
+
+  <insert id="add" parameterType="user" useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO auth_user
+    (
+    P_CREATE_BY,
+    P_CREATE_DATE,
+    P_UPDATE_BY,
+    P_UPDATE_DATE,
+    P_DELETE_FLAG,
+    P_STAFF_ID,
+    P_DEPART_ID,
+    P_NAME,
+    P_SEX,
+    P_BIRTHDAY,
+    P_MOBILE,
+    P_TEL,
+    P_EMAIL,
+    P_CONTACT,
+    P_ACCOUNT,
+    P_PASSWORD,
+    P_STATE,
+    P_ONLINE_STATE,
+    P_IS_CHANGE_PWD
+    )
+    VALUES
+    (
+	#{createBy},
+	SYSDATE(),
+	#{updateBy},
+	SYSDATE(),
+	0,
+	#{staffId},
+	#{departId},
+	#{name},
+	#{sex},
+	#{birthday},
+	#{mobile},
+	#{tel},
+	#{email},
+	#{contact},
+	#{account},
+	#{password},
+	1,
+	0,
+	0
+    )
+  </insert>
+
+  <update id="update" parameterType="user">
+    UPDATE auth_user SET
+    P_UPDATE_BY = #{updateBy},
+    P_UPDATE_DATE = SYSDATE(),
+    P_STAFF_ID = #{staffId},
+    P_NAME = #{name},
+    P_SEX = #{sex},
+    P_BIRTHDAY = #{birthday},
+    P_MOBILE = #{mobile},
+    P_TEL = #{tel},
+    P_EMAIL = #{email},
+    P_CONTACT = #{contact}
+    WHERE ID = #{id}
+  </update>
+  <update id="updateDepartByUserId"> 
+      UPDATE auth_user SET
+      P_UPDATE_BY = #{updateBy},
+      P_UPDATE_DATE = SYSDATE(),
+      P_DEPART_ID = #{departId}
+      WHERE ID = #{id}
+  </update>
+  
+  <update id="updateManager" parameterType="user"> 
+      UPDATE auth_user SET
+      P_UPDATE_BY = #{updateBy},
+      P_UPDATE_DATE = SYSDATE(),
+      P_IS_MANAGE = #{isManager}
+      WHERE ID = #{id}
+  </update>
+  <update id="updateState" parameterType="user">
+  	UPDATE auth_user SET
+    P_UPDATE_BY = #{updateBy},
+    P_UPDATE_DATE = SYSDATE(),
+    P_STATE = #{state}
+    WHERE ID = #{id}
+  </update>
+
+  <delete id="delByIds">
+    DELETE FROM auth_user
+    WHERE ID IN
+    <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+      #{item}
+    </foreach>
+  </delete>
+
+</mapper>

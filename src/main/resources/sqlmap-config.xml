@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	
+	<properties>
+		<property name="dialect" value="mysql" />
+	</properties>
+	<typeAliases>
+		<typeAlias alias="user" type="com.revanow.auth.entity.User" />
+		<typeAlias alias="roleRight" type="com.revanow.auth.entity.RoleRight" />
+		<typeAlias alias="role" type="com.revanow.auth.entity.Role" />
+		<typeAlias alias="right" type="com.revanow.auth.entity.Right" />
+		<typeAlias alias="userRole" type="com.revanow.auth.entity.UserRole" />
+		<typeAlias alias="depart" type="com.revanow.auth.entity.Depart" />
+		<typeAlias alias="roleRight" type="com.revanow.auth.entity.RoleRight" />
+		<typeAlias alias="roleDepart" type="com.revanow.auth.entity.RoleDepart" />
+		<typeAlias alias="upIncome" type="com.revanow.test.entity.UpIncome" />
+		<typeAlias alias="avIncome" type="com.revanow.test.entity.AvIncome" />
+	</typeAliases>
+	<plugins>
+		<plugin interceptor="com.revanow.base.page.PaginationInterceptor" />
+	</plugins>
+</configuration>

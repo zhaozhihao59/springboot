@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.revanow.auth.dao.IRoleDao">
+	<resultMap type="role" id="roleResultMap" >
+		<!--  -->
+		<result property="id" column="ID" />
+		<!--  -->
+		<result property="createBy" column="P_CREATE_BY" />
+		<!--  -->
+		<result property="createDate" column="P_CREATE_DATE" />
+		<!--  -->
+		<result property="updateBy" column="P_UPDATE_BY" />
+		<!--  -->
+		<result property="updateDate" column="P_UPDATE_DATE" />
+		<!--  -->
+		<result property="deleteFlag" column="P_DELETE_FLAG" />
+		<!--  -->
+		<result property="name" column="P_NAME" />
+		<!--  -->
+		<result property="remark" column="P_REMARK" />
+		<!--  -->
+		<result property="roleType" column="P_ROLE_TYPE" />
+		<!--  -->
+		<result property="code" column="P_CODE" />
+		<!--  -->
+		<result property="oldDepartId" column="P_DEPART_ID" />
+	</resultMap>
+
+
+	<sql id="allColumnSql">
+    o.ID,
+    o.P_CREATE_BY,
+    o.P_CREATE_DATE,
+    o.P_UPDATE_BY,
+    o.P_UPDATE_DATE,
+    o.P_DELETE_FLAG,
+    o.P_NAME,
+    o.P_CODE,
+    o.P_ROLE_TYPE,
+    o.P_REMARK
+  </sql>
+
+  <sql id="searchConditionSql">
+  	  <if test="condition.searchKey != null and condition.searchKey != ''">
+      AND (o.P_NAME like '%${condition.searchKey}%' OR o.P_CODE like '%${condition.searchKey}%')
+	  </if>
+	  <if test="condition.name != null and condition.name != ''">
+      AND o.P_NAME like '%${condition.name}%'
+	  </if>
+	  <if test="condition.code != null and condition.code != ''">
+      AND o.P_CODE like '%${condition.code}%'
+	  </if>
+	  <if test="condition.remark != null and condition.remark != ''">
+      AND o.P_REMARK like '%${condition.remark}%'
+	  </if>
+	  <if test="condition.departId != null and condition.departId != ''">
+	  	AND o1.P_DEPART_ID in (select id from auth_depart where FIND_IN_SET(id, getDepartListByPid('${condition.departId}')))
+	  </if>
+  </sql>
+
+  <select id="listRoleAll" resultMap="roleResultMap">
+    SELECT <include refid="allColumnSql"/>
+    FROM auth_role o
+  </select>
+  
+
+  <select id="listRoleByPage" resultMap="roleResultMap">
+    SELECT <include refid="allColumnSql"/>
+    FROM auth_role o inner join auth_role_depart o1 ON o.ID = o1.P_ROLE_ID
+    WHERE 1=1 <include refid="searchConditionSql"/>
+  </select>
+  <select id="listRoleByPageCount" resultType="int">
+    SELECT count(1) FROM auth_role o inner join auth_role_depart o1 ON o.ID = o1.P_ROLE_ID
+    WHERE 1=1 <include refid="searchConditionSql"/>
+  </select>
+
+  <select id="getRoleById" resultMap="roleResultMap">
+    SELECT <include refid="allColumnSql"/>,o1.P_DEPART_ID
+    FROM auth_role o inner join auth_role_depart o1 ON o.ID = o1.P_ROLE_ID
+    WHERE o.ID = #{id}
+  </select>
+  
+  <select id="getCountByCode" resultType="int">
+  	SELECT COUNT(1)
+    FROM auth_role o
+    WHERE o.P_CODE = #{code} 
+    <if test="id != null and id != ''">
+    AND o.ID != #{id}
+    </if>
+    
+  </select>
+
+
+	<insert id="add" parameterType="role" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO auth_role
+		(
+		P_CREATE_BY,
+		P_CREATE_DATE,
+		P_UPDATE_BY,
+		P_UPDATE_DATE,
+		P_DELETE_FLAG,
+		P_NAME,
+		P_REMARK,
+		P_ROLE_TYPE
+		)
+		VALUES
+		(
+		#{createBy},
+		SYSDATE(),
+		#{updateBy},
+		SYSDATE(),
+		#{deleteFlag},
+		#{name},
+		#{remark},
+		2
+		)
+		</insert>
+
+	<insert id="batchInsert" >
+		INSERT INTO auth_role
+		(
+		P_CREATE_BY,
+		P_CREATE_DATE,
+		P_UPDATE_BY,
+		P_UPDATE_DATE,
+		P_DELETE_FLAG,
+		P_NAME,
+		P_REMARK,
+		P_ROLE_TYPE
+		)
+		VALUES
+		<foreach collection="array" index="index" item="item" separator=",">
+		(
+		#{item.createBy},
+		#{item.createDate},
+		#{item.updateBy},
+		#{item.updateDate},
+		#{item.deleteFlag},
+		#{item.name},
+		#{item.remark},
+		#{item.roleType}
+		)
+		</foreach>
+		</insert>
+
+	<update id="update" parameterType="role">
+		UPDATE auth_role SET
+		P_CREATE_BY = #{createBy},
+		P_CREATE_DATE = #{createDate},
+		P_UPDATE_BY = #{updateBy},
+		P_UPDATE_DATE = #{updateDate},
+		P_DELETE_FLAG = #{deleteFlag},
+		P_NAME = #{name},
+		P_REMARK = #{remark},
+		P_ROLE_TYPE = #{roleType}
+		WHERE ID = #{id}
+	</update>
+
+	<delete id="delByIds">
+		DELETE FROM auth_role
+		WHERE ID IN
+		<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+</mapper>

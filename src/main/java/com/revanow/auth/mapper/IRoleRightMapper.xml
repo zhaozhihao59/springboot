@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.revanow.auth.dao.IRoleRightDao">
+	
+	<select id="listRightByRoleId" resultMap="com.revanow.auth.dao.IRightDao.rightResultMap">
+		SELECT DISTINCT <include refid="com.revanow.auth.dao.IRightDao.allColumnSql"/>
+	    FROM auth_role_right o0
+	    INNER JOIN auth_role o ON o0.P_ROLE_ID = o.ID
+	    WHERE o0.P_ROLE_ID = #{roleId}
+	</select>
+
+
+	<insert id="add" parameterType="roleRight">
+		INSERT INTO auth_role_right
+		(
+		P_ROLE_ID,
+		P_RIGHT_ID
+		)
+		VALUES
+		(
+		#{roleId},
+		#{rightId}
+		)
+	</insert>
+
+	<delete id="delByRoleId">
+		DELETE FROM auth_role_right
+		WHERE P_ROLE_ID = #{roleId}
+	</delete>
+</mapper>

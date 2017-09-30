@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.revanow.auth.dao.IRoleDepartDao">
+	<resultMap type="roleDepart" id="authRoleDepartResultMap" >
+		<!-- 主键 -->
+		<result property="id" column="ID" />
+		<!-- 部门ID -->
+		<result property="departId" column="P_DEPART_ID" />
+		<!-- 权限ID -->
+		<result property="roleId" column="P_ROLE_ID" />
+	</resultMap>
+
+
+	<sql id="allColumnSql">
+		o.ID,
+		o.P_DEPART_ID,
+		o.P_ROLE_ID
+	</sql>
+
+
+	<sql id="searchConditionSql">
+	</sql>
+
+	<select id="listAuthRoleDepartAll" resultMap="authRoleDepartResultMap">
+		SELECT <include refid="allColumnSql"/>
+		FROM auth_role_depart o
+	</select>
+
+	<select id="getAuthRoleDepartByPageCount" resultType="int">
+		SELECT count(1)
+		FROM auth_role_depart o
+		WHERE 1=1 <include refid="searchConditionSql"/>
+	</select>
+
+	<select id="listAuthRoleDepartByPage" resultMap="authRoleDepartResultMap">
+		SELECT <include refid="allColumnSql"/>
+		FROM auth_role_depart o
+		WHERE 1=1 <include refid="searchConditionSql"/>
+	</select>
+
+	<select id="getAuthRoleDepartById" resultMap="authRoleDepartResultMap">
+		SELECT <include refid="allColumnSql"/>
+		FROM auth_role_depart o
+		WHERE o.ID = #{id}
+	</select>
+
+	<insert id="add" parameterType="roleDepart" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO auth_role_depart
+		(
+		P_DEPART_ID,
+		P_ROLE_ID
+		)
+		VALUES
+		(
+		#{departId},
+		#{roleId}
+		)
+		</insert>
+
+	<insert id="batchInsert" >
+		INSERT INTO auth_role_depart
+		(
+		P_DEPART_ID,
+		P_ROLE_ID
+		)
+		VALUES
+		<foreach collection="list" index="index" item="item" separator=",">
+		(
+		#{item.departId},
+		#{item.roleId}
+		)
+		</foreach>
+		</insert>
+
+	<update id="update" parameterType="roleDepart">
+		UPDATE auth_role_depart SET
+		P_DEPART_ID = #{departId},
+		P_ROLE_ID = #{roleId}
+		WHERE ID = #{id}
+	</update>
+	<update id="updateByOldRole">
+	    UPDATE auth_role_depart SET
+		P_DEPART_ID = #{item.newDepartId},
+		P_ROLE_ID = #{item.id}
+		WHERE ID = #{item.id} and P_DEPART_ID = #{item.oldDepartId}
+	</update>
+	<delete id="delByRoleItem">
+	    DELETE FROM auth_role_depart
+	    WHERE P_ROLE_ID = #{item.id} AND P_DEPART_ID = #{item.oldDepartId}
+	</delete>
+	
+	<delete id="delByIds">
+		DELETE FROM auth_role_depart
+		WHERE ID IN
+		<foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+</mapper>
